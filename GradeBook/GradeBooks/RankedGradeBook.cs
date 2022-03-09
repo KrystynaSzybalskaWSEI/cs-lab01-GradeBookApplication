@@ -1,5 +1,6 @@
 ﻿using GradeBook.Enums;
 using System;
+using System.Linq;
 
 namespace GradeBook.GradeBooks {
     public class RankedGradeBook : BaseGradeBook {
@@ -7,36 +8,22 @@ namespace GradeBook.GradeBooks {
             Type = GradeBookType.Ranked;
         }
 
-        public override char GetLetterGrade(double averageGrade) {
-            if (Students.Count < 5) {
+        public override char GetLetterGrade(double averageGrade)
+        {
+            if (Students.Count < 5)
+            {
                 throw new InvalidOperationException();
             }
-
-            char letter_grade = 'A';
-            int twenty_percent = Students.Count / 5;
-            int better_students_count = 0;
-            Students.Sort();
-            Students.Reverse();
-
-            while (averageGrade < Students[better_students_count].AverageGrade) {
-                better_students_count++;
-            }
-
-            if (better_students_count > twenty_percent) {
-                if (better_students_count > 2*twenty_percent) {
-                    if (better_students_count > 3*twenty_percent) {
-                        if (better_students_count > 4 * twenty_percent) {
-                            letter_grade = 'F';
-                        }
-                        letter_grade = 'D';
-                    }
-                    letter_grade = 'C';
-                }
-                letter_grade = 'B';
-            }
-
-            return letter_grade;
+            int twentyPercent = Students.Count / 5;
+            int betterStudentsCount = Students.Count(student => student.AverageGrade >= averageGrade);
+            
+            if (betterStudentsCount <= twentyPercent) return 'A';
+            if (betterStudentsCount <= 2*twentyPercent) return 'B';
+            if (betterStudentsCount <= 3*twentyPercent) return 'C';
+            if (betterStudentsCount <= 4*twentyPercent) return 'D';
+            return 'F';
         }
+
         public override void CalculateStatistics() {
             if (Students.Count < 5) {
                 Console.WriteLine("Ranked grading requires at least 5 students.");
